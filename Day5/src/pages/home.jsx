@@ -15,7 +15,7 @@ import Footer from "../components/footer";
 function Home(){
     const nav=useNavigate();
     const userName=useSelector((state)=>state.login.userName);
-    const isLogged=useSelector((state)=>state.login.isLoggedin)
+    const isLogged=useSelector((state)=>state.login.isLoggedin);
     useEffect(()=>{
         if(!isLogged)
             nav("/");
