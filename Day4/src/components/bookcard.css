@@ -1,0 +1,26 @@
+.book-card-outer{
+    margin:3%;
+    border-radius: 10px;
+    background-color: black;
+    padding:20px;
+}
+.book-card-img{
+    border-radius: 10px;
+    width: 150px;
+    height:150px;
+}
+.book-card-details{
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    color: white;
+}
+.book-card-det{
+    margin-top: 10px;
+}
+#rating-star{
+    color:yellow;
+    margin-right: 10px;
+}
+.book-card-rating{
+    font-size: 23px;
+}
