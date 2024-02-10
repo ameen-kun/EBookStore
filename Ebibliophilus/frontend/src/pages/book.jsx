@@ -20,6 +20,7 @@ import Backdrop from "@mui/material/Backdrop";
 import { Carousel } from "react-bootstrap";
 import { CancelOutlined } from "@mui/icons-material";
 import { BookmarkOutlined } from "@mui/icons-material";
+import { url } from "../util";
 
 function Book(){
     const params=useParams();
@@ -40,25 +41,26 @@ function Book(){
     const [loaded,setLoaded]=useState(false);
     const [genres,setGenres]=useState("");
     const [bookinLib,setBookInLib]=useState(false);
+    const [pageno,setPageNo]=useState(0);
     const getData=async()=>{
         try {
-            const res=await axios.get("http://localhost:8081/open/bookbyid/"+params.id)
-            const isBookCart= await axios.get("http://localhost:8081/user/bookInCart/"+userid+"/"+params.id,{
+            const res=await axios.get(url+"open/bookbyid/"+params.id)
+            const isBookCart= await axios.get(url+"user/bookInCart/"+userid+"/"+params.id,{
                 headers:{
                     Authorization:"Bearer "+token
                 }
             })
-            const isBookWish= await axios.get("http://localhost:8081/user/bookInWish/"+userid+"/"+params.id,{
+            const isBookWish= await axios.get(url+"user/bookInWish/"+userid+"/"+params.id,{
                 headers:{
                     Authorization:"Bearer "+token
                 }
             })
-            const bookrevs=await axios.get("http://localhost:8081/user/getBookReviews/"+params.id,{
+            const bookrevs=await axios.get(url+"user/getBookReviews/"+params.id,{
                 headers:{
                     Authorization:"Bearer "+token
                 }
             })
-            const isBookLib=await axios.get("http://localhost:8081/user/bookInLibrary/"+userid+"/"+params.id,{
+            const isBookLib=await axios.get(url+"user/bookInLibrary/"+userid+"/"+params.id,{
                 headers:{
                     Authorization:"Bearer "+token
                 }
@@ -141,7 +143,7 @@ function Book(){
             valid=false;
         }
         if(valid){
-        await axios.post("http://localhost:8081/user/addReview",{
+        await axios.post(url+"user/addReview",{
             "rating":rating,
             "review":newcomment,
             "userid":userid,
@@ -162,7 +164,7 @@ function Book(){
     const [wishlistToast,setWishlistToast]=useState(false);
 
     const handleAddtoCart=async ()=>{
-        axios.post("http://localhost:8081/user/addToCart/"+userid,{
+        axios.post(url+"user/addToCart/"+userid,{
             "id":params.id
         },{
             headers:{
@@ -179,7 +181,7 @@ function Book(){
     }
     
     const handleAddtoWishlist=()=>{
-        axios.post("http://localhost:8081/user/addToWishlist/"+userid,{
+        axios.post(url+"user/addToWishlist/"+userid,{
             "id":params.id
         },{
             headers:{
@@ -197,6 +199,7 @@ function Book(){
     }
     const [read,setRead]=useState(false);
     const readBook=()=>{
+        setPageNo(1);
         setRead(!read);
     }
 
@@ -211,18 +214,20 @@ function Book(){
     }
 
     const addBookmark=async()=>{
-        axios.post("http://localhost:8081/user/addbookmark/"+userid,{
+        axios.post(url+"user/addbookmark/"+userid,{
             "bookid":params.id,
-            "pageno":1
+            "pageno":pageno
         },{
             headers:{
                 Authorization:"Bearer "+token
             }}
         ).then((res)=>{
-            console.log(res);
+            setMarkToast(true);
         }).catch(error=>console.log("Error",error));
 
     }
+
+    const [markToast,setMarkToast]=useState(false);
 
     if(!loaded){
         return(
@@ -235,13 +240,18 @@ function Book(){
         <div className="book-outer">
             <Backdrop  sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
             open={read}>
+            <Snackbar anchorOrigin={{vertical:'bottom',horizontal:'right'}} open={markToast} onClose={()=>setMarkToast(!markToast)} autoHideDuration={3000}>
+                <Alert sx={{backgroundColor:'green',width:'300px',color:'white',translate:'15px 0'}} variant="success">
+                    Bookmark Added!                  
+                 </Alert>
+            </Snackbar>
                 <div className="read-box">
                 <div className="read-icons">
                 <BookmarkOutlined sx={{cursor:"pointer"}} onClick={addBookmark}/>
                 <CancelOutlined id="read-cancel" onClick={readBook}/>
                 </div>
                 <div className="read-carousel">
-                <Carousel fade={true} slide={false} interval={null}>
+                <Carousel fade={true} slide={false} interval={null} onSelect={()=>setPageNo(pageno+1)}>
                 {previewimages.map((i)=>{
                     return(
                         <Carousel.Item interval={null}>
@@ -258,6 +268,7 @@ function Book(){
             })}
                 </Carousel>
             </div>
+            Page {pageno}
             </div>
             </Backdrop>
             <div className="book-box">

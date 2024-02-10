@@ -5,6 +5,13 @@
     width: 100%;
     padding-bottom:30px;
 }
+@media (max-width: 768px) {
+    .navbar-outer {
+      flex-direction: column; /* Stack items vertically */
+      align-items: center; /* Center items horizontally */
+      height: auto;
+    }
+}
 #navbar-logo{
     height:100px;
 }

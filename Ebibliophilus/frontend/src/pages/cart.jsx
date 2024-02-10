@@ -14,6 +14,7 @@ import { useEffect } from "react";
 import axios from "axios";
 import Loading from "../components/loading";
 import { useNavigate } from "react-router-dom";
+import { url } from "../util";
 
 function Cart(){
     const userid=useSelector((state)=>state.login.userDetails.id);
@@ -23,16 +24,22 @@ function Cart(){
     const [loaded,setLoaded]=useState(false);
     const islogged=useSelector((state)=>state.login.isLoggedin);
     const nav=useNavigate();
-
+    const [wallet,setWallet]=useState(0);
     const getData=async()=>{
         try{
-            const cartbooks=await axios.get("http://localhost:8081/user/cart/"+userid,{
+            const cartbooks=await axios.get(url+"user/cart/"+userid,{
                 headers: {
                   Authorization: 'Bearer ' + token
                 }
             });
             setBooks(cartbooks.data.books);
             setTotal(cartbooks.data.total);
+            const walletval=await axios.get(url+"user/wallet/"+userid,{
+                headers: {
+                  Authorization: 'Bearer ' + token
+                }
+            });
+            setWallet(walletval.data);
         }
         catch(error){
             console.log(error);
@@ -54,7 +61,7 @@ function Cart(){
 
 
     const handleRemove=async (book)=>{
-        await axios.delete("http://localhost:8081/user/deleteFromCart/"+userid+"/"+book.id,{
+        await axios.delete(url+"user/deleteFromCart/"+userid+"/"+book.id,{
             headers: {
               Authorization: 'Bearer ' + token
             }
@@ -77,16 +84,25 @@ function Cart(){
         SetOrderToast(false);
     }
     const placeOrder=async ()=>{
-        await axios.post("http://localhost:8081/user/moveBooks/"+userid,{},{
-            headers:{
-                Authorization:"Bearer "+token
+        if(total!=0){
+            if(wallet>=total){
+                await axios.post(url+"user/moveBooks/"+userid,{},{
+                headers:{
+                    Authorization:"Bearer "+token
+                }
+            }).catch(error=>console.log(error));
+            SetOrderToast(true);
+            setTimeout(()=>{
+                window.location.reload(true);
+            },1500)
             }
-        }).catch(error=>console.log(error));
-        SetOrderToast(true);
-        setTimeout(()=>{
-            window.location.reload(true);
-        },1500)
+            else{
+                setFundToast(true);
+            }
+        }
     }
+
+    const [fundToast,setFundToast]=useState(false);
 
     if(!loaded)
     return(
@@ -98,6 +114,11 @@ function Cart(){
             <Snackbar anchorOrigin={{vertical:'bottom',horizontal:'right'}} open={cartToast} onClose={handleToastClose} autoHideDuration={3000}>
                 <Alert sx={{backgroundColor:'red',width:'300px',color:'white',translate:'15px 0'}} variant="success">
                     Book Deleted from Cart!                   
+                 </Alert>
+            </Snackbar>
+            <Snackbar anchorOrigin={{vertical:'bottom',horizontal:'right'}} open={fundToast} onClose={()=>setFundToast(!fundToast)} autoHideDuration={3000}>
+                <Alert sx={{backgroundColor:'red',width:'300px',color:'white',translate:'15px 0'}} variant="success">
+                 Insufficient Funds!!!
                  </Alert>
             </Snackbar>
             <Snackbar anchorOrigin={{vertical:'bottom',horizontal:'right'}} open={orderToast} onClose={handleOrderToast} autoHideDuration={3000}>
@@ -143,6 +164,7 @@ function Cart(){
                                 <h2>
                                  ${total}
                                 </h2>
+                                <h5>Wallet : ${wallet}</h5>
                                 <div className="check-out-button-cont">
                                     <Button className="check-out-button"variant="warning" onClick={placeOrder}>Confirm and Check-Out</Button>
                                 </div>

@@ -5,6 +5,13 @@
     justify-content: center;
     transition: height ease-out;
 }
+@media (max-width: 768px) {
+    .exp-book-col {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+}
 .explore-box{
     margin: 1%;
     border-radius: 20px;
@@ -26,7 +33,7 @@
     margin-top:3%
 }
 #exp-search-bar{
-    width:700px;
+    width:500px;
 }
 .exp-books{
     margin: 2%;

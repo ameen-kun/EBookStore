@@ -38,6 +38,14 @@
     flex-direction: column;
     border-left:1px solid black;
 }
+@media (max-width: 768px) {
+        .home-carousel {
+            width:100%;
+        }
+        .cont-reading{
+            display: none;
+        }
+    }
 .cont-reading-title{
     padding-bottom: 15px;
     border-bottom: 2px solid black;

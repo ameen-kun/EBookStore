@@ -12,6 +12,7 @@ import axios from "axios";
 import Loading from "../components/loading";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { url } from "../util";
 
 
 function Explore(){
@@ -22,7 +23,7 @@ function Explore(){
     const nav=useNavigate();
     const getData=async ()=>{
         try{
-            const fetch=await axios.get("http://localhost:8081/open/book")
+            const fetch=await axios.get(url+"open/book")
             setAllBooks(fetch.data);
             setBooks(fetch.data);
         }
@@ -76,13 +77,14 @@ function Explore(){
                         <Form.Group controlId="explore-search">
                         <InputGroup className="mb-3">
                             <InputGroup.Text id="basic-addon1"><SearchOutlined/></InputGroup.Text>
-                            <Form.Control id="exp-search-bar" placeholder="Search" onChange={(e)=>filterData(e.target.value)} type="search"/>
+                            <Form.Control id="exp-search-bar" placeholder="Type in Your Filter" onChange={(e)=>filterData(e.target.value)} type="search"/>
                         </InputGroup>
                         </Form.Group>
                     </Row>
                     </div>
+                    {books.length!==0?(
                     <div className="exp-books">
-                        <Row>
+                            <Row>
                         {books.map((n)=>{
                             return(
                                 <Col md="3" className="exp-book-col">
@@ -92,6 +94,11 @@ function Explore(){
                             })}
                         </Row>
                     </div>
+                    ):
+                    <div className="no-books">
+                        No books found.
+                    </div>
+                    }
                 </div>
             <div className="footer">
                 <Footer/>

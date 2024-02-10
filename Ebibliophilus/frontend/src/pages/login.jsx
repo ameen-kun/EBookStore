@@ -16,6 +16,7 @@ import { loginUser, setToken } from "../redux/loginSlice";
 import axios from "axios";
 import { Snackbar } from "@mui/material";
 import Alert from "@mui/material/Alert";
+import { url } from "../util";
 
 function Login(){
     const nav=useNavigate();
@@ -27,7 +28,7 @@ function Login(){
     const [loginToast,setLoginToast]=useState(false);
 
     const authenticate=()=>{
-        axios.post("http://localhost:8081/auth/signin",{
+        axios.post(url+"auth/signin",{
             "username":username,
             "password":password
         }).then((response=>{

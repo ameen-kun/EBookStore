@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Loading from "../components/loading";
 import { useNavigate } from "react-router-dom";
+import { url } from "../util";
 
 function MyBooks(){
     const userid=useSelector((state)=>state.login.userDetails.id);
@@ -27,17 +28,17 @@ function MyBooks(){
 
     const getData=async()=>{
         try{
-            const wishl=await axios.get("http://localhost:8081/user/wishlist/"+userid,{
+            const wishl=await axios.get(url+"user/wishlist/"+userid,{
                 headers:{
                     Authorization:"Bearer "+token
                 }
             })
-            const lib=await axios.get("http://localhost:8081/user/library/"+userid,{
+            const lib=await axios.get(url+"user/library/"+userid,{
                 headers:{
                     Authorization:"Bearer "+token
                 }
             })
-            const marks= await axios.get("http://localhost:8081/user/bookmark/"+userid,{
+            const marks= await axios.get(url+"user/bookmark/"+userid,{
                 headers:{
                     Authorization:"Bearer "+token
                 }
@@ -65,9 +66,24 @@ function MyBooks(){
     },[])
 
     const [wishToast,setWishToast]=useState(false);
+    const [markToast,setMarkToast]=useState(false);
 
-    const handleRemove=async(book)=>{
-        await axios.delete("http://localhost:8081/user/deleteFromWishlist/"+userid+"/"+book.id,{
+    const handleMarkRemove=async(book)=>{
+        await axios.delete(url+"user/deleteFromBookMark/"+userid+"/"+book.id,{
+            headers: {
+              Authorization: 'Bearer ' + token
+            }
+        })
+        .catch((error)=>{
+            console.log(error);
+        })
+        setMarkToast(true);
+        setTimeout(()=>{
+            window.location.reload(true);
+        },1000)
+    }
+    const handleWishRemove=async(book)=>{
+        await axios.delete(url+"user/deleteFromWishlist/"+userid+"/"+book.id,{
             headers: {
               Authorization: 'Bearer ' + token
             }
@@ -83,6 +99,9 @@ function MyBooks(){
     const handleToastClose=()=>{
         setWishToast(false);
     }
+    const handleMarkToastClose=()=>{
+        setMarkToast(false);
+    }
     if(!loaded)
     return(
         <Loading/>
@@ -93,6 +112,11 @@ function MyBooks(){
             <Snackbar anchorOrigin={{vertical:'bottom',horizontal:'right'}} open={wishToast} onClose={handleToastClose} autoHideDuration={3000}>
                 <Alert sx={{backgroundColor:'red',width:'300px',color:'white',translate:'15px 0'}} variant="success">
                     Book Deleted from Wishlist!                   
+                 </Alert>
+            </Snackbar>
+            <Snackbar anchorOrigin={{vertical:'bottom',horizontal:'right'}} open={markToast} onClose={handleMarkToastClose} autoHideDuration={3000}>
+                <Alert sx={{backgroundColor:'red',width:'300px',color:'white',translate:'15px 0'}} variant="success">
+                    Bookmark Removed!                   
                  </Alert>
             </Snackbar>
             <div className="mybooks-box">
@@ -134,7 +158,7 @@ function MyBooks(){
                         {bookmarks.map((n)=>{
                             return(
                                 <Col md="3" className="exp-book-col">
-                                <BookCard data={n.book}/>
+                                <WishBookCard handleClick={handleMarkRemove} data={n.book}/>
                                 </Col>
                                 )
                             })}
@@ -156,7 +180,7 @@ function MyBooks(){
                         {wishlist.map((n)=>{
                             return(
                                 <Col md="3" className="exp-book-col">
-                                <WishBookCard handleClick={handleRemove} data={n}/>
+                                <WishBookCard handleClick={handleWishRemove} data={n}/>
                                 </Col>
                                 )
                             })}

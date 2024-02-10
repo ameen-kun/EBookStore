@@ -15,6 +15,7 @@ import { LockOutlined, Person4Outlined } from "@mui/icons-material";
 import axios from "axios";
 import { Snackbar } from "@mui/material";
 import Alert from "@mui/material/Alert";
+import { url } from "../util";
 
 function Signup(){
     const nav=useNavigate();
@@ -37,7 +38,7 @@ function Signup(){
     }
 
     const createUser=()=>{
-        axios.post("http://localhost:8081/auth/register",{
+        axios.post(url+"auth/register",{
             "username":valids["userName"],
             "firstName":valids["firstName"],
             "lastName":valids["lastName"],

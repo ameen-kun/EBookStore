@@ -10,6 +10,8 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Loading  from "../components/loading";
+import { url } from "../util";
+
 function Home(){ 
     const [newArrivals,setNewArrivals]=useState([]);
     const [forYou,setForYou]=useState([]);
@@ -24,19 +26,19 @@ function Home(){
 
     const getData=async ()=>{
         try{
-            const arrivals=await axios.get("http://localhost:8081/open/newarrivals");
-            const sellers=await axios.get("http://localhost:8081/open/bestsellers");
-            const recomm= await axios.get("http://localhost:8081/user/forYou/"+userid,{
+            const arrivals=await axios.get(url+"open/newarrivals");
+            const sellers=await axios.get(url+"open/bestsellers");
+            const recomm= await axios.get(url+"user/forYou/"+userid,{
                 headers:{
                     Authorization:"Bearer "+token
                 }
             })
-            const marks= await axios.get("http://localhost:8081/user/bookmark/"+userid,{
+            const marks= await axios.get(url+"user/bookmark/"+userid,{
                 headers:{
                     Authorization:"Bearer "+token
                 }
             })
-            const wishlist=await axios.get("http://localhost:8081/user/wishlist/"+userid,{
+            const wishlist=await axios.get(url+"user/wishlist/"+userid,{
                 headers:{
                     Authorization:"Bearer "+token
                 }

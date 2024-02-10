@@ -1,7 +1,7 @@
 import "../assets/styles/profile.css";
 import CustomNavbar from "../components/navbar";
-import { Row } from "react-bootstrap";
-import Col from "react-bootstrap/Col";
+import { Snackbar } from "@mui/material";
+import Alert from "@mui/material/Alert";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import Footer from "../components/footer";
@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import Select from 'react-select';
 import makeAnimated from 'react-select/animated';
 import Button from "react-bootstrap/Button";
+import { url } from "../util";
 
 export default function Profile(){
     const [reviews,setReviews]=useState([]);
@@ -24,7 +25,7 @@ export default function Profile(){
     const nav=useNavigate();
     const islogged=useSelector((state)=>state.login.isLoggedin);
     const [userpref,setPref]=useState([]);
-
+    const [wallet,setWallet]=useState(0);
     const options=[
         {value:"Romance",label:"Romance"},
         {value:"Sad",label:"Sad"},
@@ -48,18 +49,24 @@ export default function Profile(){
     }
 
     const getData=async()=>{
-        const rev=await axios.get("http://localhost:8081/user/getUserReviews/"+userid,{
+        const walletval=await axios.get(url+"user/wallet/"+userid,{
+            headers: {
+              Authorization: 'Bearer ' + token
+            }
+        });
+        setWallet(walletval.data);
+        const rev=await axios.get(url+"user/getUserReviews/"+userid,{
             headers: {
               Authorization: 'Bearer ' + token
             }
         });
         setReviews(rev.data);
-        const pref=await axios.get("http://localhost:8081/user/getPrefs/"+userid,{
+        const pref=await axios.get(url+"user/getPrefs/"+userid,{
             headers: {
               Authorization: 'Bearer ' + token
             }
         });
-        const ord=await axios.get("http://localhost:8081/user/orders/"+userid,{
+        const ord=await axios.get(url+"user/orders/"+userid,{
             headers: {
               Authorization: 'Bearer ' + token
             }
@@ -74,6 +81,7 @@ export default function Profile(){
             })
             setPref(p);
         }
+        console.log(ord.data);
         setOrders(ord.data);
     }
 
@@ -94,7 +102,7 @@ export default function Profile(){
             prefs.push(x.value)
         })
         console.log(prefs);
-        axios.put("http://localhost:8081/user/addPrefs/"+userid,{
+        axios.put(url+"user/addPrefs/"+userid,{
             "prefs":prefs
         },{
             headers: {
@@ -117,6 +125,21 @@ export default function Profile(){
         }
     },[])
 
+    const handleBalanceAdd=async()=>{
+        axios.put(url+"user/addBalance/"+userid,{},{
+            headers: {
+              Authorization: 'Bearer ' + token
+            }
+        }).then(()=>{
+            setBalToast(true);
+            setTimeout(()=>{
+                window.location.reload(true)
+            },1500)
+        }).catch(error=>console.log("Error",error));
+    }
+
+    const [balToast,setBalToast]=useState(false);
+
     if(!loaded)
     return(
         <Loading/>
@@ -124,10 +147,25 @@ export default function Profile(){
     else
     return(
         <div className="profile-outer">
+            <Snackbar anchorOrigin={{vertical:'bottom',horizontal:'right'}} open={balToast} onClose={()=>setBalToast(!balToast)} autoHideDuration={3000}>
+                <Alert sx={{backgroundColor:'green',width:'300px',color:'white',translate:'15px 0'}} variant="success">
+                    Processing...                  
+                 </Alert>
+            </Snackbar>
             <div className="profile-box">
                 <div className="profile-nav">
                     <CustomNavbar currentPage="my-profile"/>
                 </div>
+                <div className="profile-prefs">
+                    <div className="prefs-box">
+                    <div className="prefs-head">
+                        <h3>Manage Wallet</h3>
+                        </div>
+                            <h5>Wallet Balance: ${wallet}</h5>
+                        <Button style={{marginTop:"1%"}} variant="outline-dark" onClick={handleBalanceAdd}>Add Balance</Button>
+                        </div>
+
+                    </div>
                 <div className="profile-prefs">
                     <div className="prefs-box">
                         <div className="prefs-head">
@@ -165,14 +203,13 @@ export default function Profile(){
                                         <div className="order-dets">
                                             <h4>Order ID : {o.id}</h4>
                                             <h5>Books:</h5>
-                                            {console.log(o.books)}
                                             {o.books.map((i)=>{
                                                 return(
                                                     <p>{i.title}</p>
                                                     )
                                             })}
                                             <h5>Total : ${o.total}</h5>
-                                            <h5>Placed On : {Date(o.orderDate)}</h5>
+                                            <h5>Placed On : {o.orderDate}</h5>
                                         </div>
                                     </div>
                                 )
@@ -195,6 +232,7 @@ export default function Profile(){
                                     <div className="review-cont">
                                     <div className="review-custName">
                                         <h4>Book : {r.booktitle}</h4>
+                                        <h6>Posted On: {r.postedOn}</h6>
                                         <hr/>
                                     </div>
                                     <div className="review-rating">
